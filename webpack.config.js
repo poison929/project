@@ -1,0 +1,87 @@
+//引入一个包
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+//所有配置信息写在该对象内
+module.exports = {
+    mode:"development",
+        //設置引用模块
+    resolve:{
+        extensions:['.ts','.js','less']//什么文件可以作为模块
+    },
+    //指定入口文件
+    entry:"./src/index.ts",
+    //打包文件所在目录
+    output:{
+        //目录
+        path:path.resolve(__dirname,"dist"),
+        //文件名
+        filename:"bundle.js",
+        //兼容IE停用其箭头函数
+        environment:{
+            arrowFunction:false
+        }
+    },
+    //指定webpack打包使用模块
+    module:{
+        //指定加载规则
+        rules:[
+            {
+                //针对文件类型
+                test:/\.ts$/,
+                use:[{
+                    //指定babel
+                    loader:"babel-loader",
+                    //配置babel
+                    options:{
+                        //设置预定义环境
+                        presets:[
+                            [
+                                //指定环境插件
+                                "@babel/preset-env",
+                                //配置信息
+                                {
+                                    targets:{
+                                        //浏览器版本
+                                        "chrome":"90"
+                                    },
+                                    "corejs":3,
+                                    "useBuiltIns":"usage"
+                                }
+                            ]
+                        ]
+                    }
+                },"ts-loader"],
+                //要排除文件
+                exclude:/node_modules/
+            },
+            {
+                test:/\.less$/,
+                use:[
+                    "style-loader",
+                    "css-loader",
+                    {
+                        loader:"postcss-loader",
+                        options:{
+                            postcssOptions:{
+                                plugins:[
+                                    [
+                                    require("postcss-preset-env")
+                                    ]
+                                ]
+                            }
+                        }
+                    },
+                    "less-loader"
+                ]
+            }
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({
+            title:"TS",
+            template:"./public/index.html"
+        }),
+        new CleanWebpackPlugin()
+    ]
+}
